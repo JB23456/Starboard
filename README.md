@@ -1,6 +1,6 @@
 # Starboard
 
-A questboard web app. Users sign up with a student number (one capital letter followed by 8 digits, e.g. `C24733535`) and a 6-digit PIN, complete quests (text or image submissions), earn stars, and climb a public leaderboard.
+A questboard web app. Users sign up with a student number (one capital letter followed by 8 digits, e.g. `C12345678`) and a 6-digit PIN, complete quests (text or image submissions), earn stars, and climb a public leaderboard.
 
 ---
 
