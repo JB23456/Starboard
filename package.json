@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/ensure-env.mjs",
     "build": "prisma migrate deploy && next build",
     "start": "next start",
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@prisma/client": "^5.19.0",
+    "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "next": "^15.0.0",
     "react": "^19.0.0",
@@ -23,7 +24,7 @@
     "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.5.26",
-    "prisma": "^5.19.0",
+    "prisma": "^5.22.0",
     "tailwindcss": "^3.4.0",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0"
@@ -32,9 +33,9 @@
     "postcss": "^8.5.26"
   },
   "allowScripts": {
+    "esbuild@0.28.2": true,
     "@prisma/client@5.22.0": true,
     "@prisma/engines@5.22.0": true,
-    "esbuild@0.28.2": true,
     "prisma@5.22.0": true
   }
 }
