@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String       @id @default(cuid())
+  firstName     String
+  lastName      String
+  studentNumber String       @unique
+  pinHash       String
+  role          String       @default("user")
+  stars         Int          @default(0)
+  active        Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  sessions      Session[]
+  submissions   Submission[]
+  reviews       Submission[] @relation("reviewer")
+}
+
+model Quest {
+  id             String       @id @default(cuid())
+  title          String
+  description    String
+  rewardStars    Int
+  submissionType String
+  active         Boolean      @default(true)
+  createdBy      String
+  createdAt      DateTime     @default(now())
+  removedAt      DateTime?
+  submissions    Submission[]
+}
+
+model Submission {
+  id          String   @id @default(cuid())
+  questId     String
+  userId      String
+  textPayload String?
+  imagePath   String?
+  status      String   @default("pending")
+  adminNote   String?
+  submittedAt DateTime @default(now())
+  reviewedAt  DateTime?
+  reviewedBy  String?
+  quest       Quest    @relation(fields: [questId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+  reviewer    User?    @relation("reviewer", fields: [reviewedBy], references: [id])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
