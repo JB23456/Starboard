@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import type { NextRequest } from "next/server";
 import { prisma } from "./db";
 import crypto from "crypto";
 import type { User } from "@prisma/client";
@@ -47,10 +48,13 @@ export async function requireAdmin(): Promise<User | null> {
   return user;
 }
 
-export function sessionCookieOptions() {
+export function sessionCookieOptions(req?: NextRequest) {
+  const isSecure =
+    req?.nextUrl.protocol === "https:" ||
+    req?.headers.get("x-forwarded-proto") === "https";
   return {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: isSecure ?? false,
     sameSite: "strict" as const,
     path: "/",
     maxAge: SESSION_DURATION_MS / 1000,

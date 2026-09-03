@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       ok: true,
       user: { id: user.id, firstName: user.firstName, role: user.role },
     });
-    res.cookies.set("session", token, sessionCookieOptions());
+    res.cookies.set("session", token, sessionCookieOptions(req));
     return res;
   } catch (error) {
     console.error("Signup error:", error);
