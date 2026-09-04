@@ -1,5 +1,6 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
+RUN apk add --no-cache openssl
 ARG DATABASE_URL="file:/app/data/production.db"
 ENV DATABASE_URL=$DATABASE_URL
 COPY package*.json ./
@@ -8,7 +9,6 @@ RUN npm ci
 
 FROM node:20-alpine AS build
 WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
 ARG DATABASE_URL="file:/app/data/production.db"
 ENV DATABASE_URL=$DATABASE_URL
 COPY --from=deps /app/node_modules ./node_modules
@@ -17,6 +17,7 @@ RUN npx next build
 
 FROM node:20-alpine AS run
 WORKDIR /app
+RUN apk add --no-cache openssl
 ENV NODE_ENV=production
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/.next ./.next
