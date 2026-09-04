@@ -144,11 +144,48 @@ User=www-data
 WantedBy=multi-user.target
 ```
 
+### Using Docker
+
+The `Dockerfile` and `docker-compose.yml` live on the **`docker` branch** (the `main` branch contains no Docker files). On the target machine:
+
+```bash
+git clone -b docker --single-branch <repo>
+cd starboard
+docker compose up -d --build
+```
+
+Notes:
+
+- The app listens on port 3000, bound to all interfaces on the Docker host (reachable from the local network). External access should go through a reverse proxy on your domain; the proxy must forward `X-Forwarded-Proto` so session cookies get the `secure` flag over HTTPS.
+- All persistent state (SQLite database + image uploads) lives in the `starboard-data` Docker volume at `/app/data`. The database URL is fixed to `file:/app/data/production.db` (set as a build arg and runtime env — keep them in sync if you change it).
+- Database migrations (`prisma migrate deploy`) run automatically when the container starts, so a fresh volume is migrated on first boot.
+- As with any fresh database, the **first account to sign up becomes the admin**.
+
+Releasing an update:
+
+```bash
+# On your build machine:
+git checkout docker
+git merge main
+git push
+
+# On the target machine:
+git pull
+docker compose up -d    # rebuilds the image, runs migrations, restarts
+```
+
 ### Backups
 
 ```bash
 # Backup database + uploads
 tar -czf starboard-backup-$(date +%F).tar.gz prisma/dev.db data/uploads/
+```
+
+When using Docker, the data lives in a volume instead:
+
+```bash
+docker run --rm -v starboard_starboard-data:/data -v %cd:/backup alpine \
+  tar czf /backup/starboard-backup-$(date +%F).tar.gz -C /data .
 ```
 
 Restore:
