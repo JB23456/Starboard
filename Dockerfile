@@ -8,6 +8,7 @@ RUN npm ci
 
 FROM node:20-alpine AS build
 WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
 ARG DATABASE_URL="file:/app/data/production.db"
 ENV DATABASE_URL=$DATABASE_URL
 COPY --from=deps /app/node_modules ./node_modules
