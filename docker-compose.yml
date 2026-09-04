@@ -1,0 +1,18 @@
+services:
+  starboard:
+    build:
+      context: .
+      args:
+        DATABASE_URL: "file:/app/data/production.db"
+    image: starboard:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - starboard-data:/app/data
+    environment:
+      - DATABASE_URL=file:/app/data/production.db
+    command: ["sh", "-c", "npx prisma migrate deploy && npm start"]
+    restart: unless-stopped
+
+volumes:
+  starboard-data:
