@@ -1,6 +1,6 @@
 # Starboard
 
-A questboard web app. Users sign up with a student number (one capital letter followed by 8 digits, e.g. `C12345678`) and a 6-digit PIN, complete quests (text or image submissions), earn stars, and climb a public leaderboard.
+A questboard web app. Users sign up with their first name, Discord username, a student number (one capital letter followed by 8 digits, e.g. `C12345678`) and a 6-digit PIN, complete quests (text or image submissions), earn stars, and climb a public leaderboard showing first name, Discord, and star count.
 
 ---
 
@@ -23,7 +23,7 @@ A questboard web app. Users sign up with a student number (one capital letter fo
 ## Database Schema (SQLite)
 
 ```
-User         — firstName, lastName, studentNumber (unique), pinHash, role, stars, active
+User         — firstName, discord, studentNumber (unique), pinHash, role, stars, active
 Quest        — title, description, rewardStars, submissionType (text|image), active, removedAt
 Submission   — questId, userId, textPayload, imagePath, status (pending|approved|rejected)
 Session      — token (unique), userId, expiresAt

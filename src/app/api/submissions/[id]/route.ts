@@ -14,9 +14,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const submission = await prisma.submission.findUnique({
       where: { id },
       include: {
-        user: { select: { id: true, firstName: true, lastName: true, studentNumber: true } },
+        user: { select: { id: true, firstName: true, discord: true, studentNumber: true } },
         quest: { select: { id: true, title: true, description: true, rewardStars: true, submissionType: true } },
-        reviewer: { select: { id: true, firstName: true, lastName: true } },
+        reviewer: { select: { id: true, firstName: true, discord: true } },
       },
     });
     if (!submission) {
@@ -81,7 +81,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return tx.submission.findUnique({
         where: { id },
         include: {
-          user: { select: { id: true, firstName: true, lastName: true, stars: true } },
+          user: { select: { id: true, firstName: true, discord: true, stars: true } },
           quest: { select: { id: true, title: true } },
         },
       });

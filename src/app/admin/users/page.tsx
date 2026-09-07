@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 interface User {
   id: string;
   firstName: string;
-  lastName: string;
+  discord: string;
   studentNumber: string;
   role: string;
   stars: number;
@@ -66,7 +66,7 @@ export default function AdminUsersPage() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name or student #..."
+            placeholder="Search by name, Discord, or student #..."
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-64"
         />
       </div>
@@ -89,6 +89,7 @@ export default function AdminUsersPage() {
           <thead>
             <tr className="border-b border-gray-200 text-left">
               <th className="py-2 pr-4">Name</th>
+              <th className="py-2 pr-4">Discord</th>
               <th className="py-2 pr-4">Student #</th>
               <th className="py-2 pr-4">Role</th>
               <th className="py-2 pr-4">Stars</th>
@@ -106,7 +107,8 @@ export default function AdminUsersPage() {
                 }`}
                 onClick={() => setSelectedId(u.id)}
               >
-                <td className="py-2 pr-4 font-medium">{u.firstName} {u.lastName}</td>
+                <td className="py-2 pr-4 font-medium">{u.firstName}</td>
+                <td className="py-2 pr-4 text-gray-500">{u.discord}</td>
                 <td className="py-2 pr-4">{u.studentNumber}</td>
                 <td className="py-2 pr-4">
                   <span className={`px-2 py-0.5 rounded-full text-xs ${
