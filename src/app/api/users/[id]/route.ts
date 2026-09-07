@@ -16,8 +16,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const body = await req.json();
 
     const schema = z.object({
-      action: z.enum(["resetPin", "adjustStars", "toggleActive", "setRole"]),
+      action: z.enum(["resetPin", "adjustStars", "toggleActive", "setRole", "updateProfile"]),
       value: z.union([z.string(), z.number(), z.boolean()]).optional(),
+      profile: z
+        .object({
+          firstName: z.string().min(1).max(100).optional(),
+          discord: z.string().min(1).max(100).optional(),
+          studentNumber: z
+            .string()
+            .regex(/^[A-Z]\d{8}$/, "Student number must be a capital letter followed by 8 digits")
+            .optional(),
+        })
+        .optional(),
       note: z.string().optional(),
     });
 
@@ -71,6 +81,32 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           where: { id },
           data: { role },
         });
+        break;
+      }
+      case "updateProfile": {
+        const profile = parsed.data.profile;
+        if (
+          !profile ||
+          (profile.firstName === undefined &&
+            profile.discord === undefined &&
+            profile.studentNumber === undefined)
+        ) {
+          return NextResponse.json({ error: "No profile fields provided" }, { status: 400 });
+        }
+        if (profile.studentNumber && profile.studentNumber !== user.studentNumber) {
+          const clash = await prisma.user.findUnique({ where: { studentNumber: profile.studentNumber } });
+          if (clash) {
+            return NextResponse.json(
+              { error: "That student number is already in use by another user" },
+              { status: 409 }
+            );
+          }
+        }
+        const data: { firstName?: string; discord?: string; studentNumber?: string } = {};
+        if (profile.firstName !== undefined) data.firstName = profile.firstName;
+        if (profile.discord !== undefined) data.discord = profile.discord;
+        if (profile.studentNumber !== undefined) data.studentNumber = profile.studentNumber;
+        result = await prisma.user.update({ where: { id }, data });
         break;
       }
       default:

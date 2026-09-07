@@ -99,7 +99,7 @@ All frontend styling is in `src/app/globals.css` and `tailwind.config.ts`. Key p
 
 ### Admin Access
 
-Only users with `role: "admin"` can access `/admin/*` routes and admin API endpoints. The first account to sign up becomes the admin automatically. You can promote/demote users from the admin panel (`/admin/users`).
+Only users with `role: "admin"` can access `/admin/*` routes and admin API endpoints. The first account to sign up becomes the admin automatically. From the admin panel (`/admin/users`) you can promote/demote users, reset their PIN, adjust stars, disable accounts, and correct a user's first name, Discord username, or student number.
 
 ---
 
@@ -215,6 +215,13 @@ tar -xzf starboard-backup-YYYY-MM-DD.tar.gz
 1. Navigate to `/admin/users`
 2. Find the user, click "Reset PIN"
 3. A new 6-digit PIN is generated and displayed — share it with the student
+
+### Edit a User's Details
+1. Navigate to `/admin/users`
+2. Find the user, click **Edit**
+3. Update the first name, Discord username, and/or student number, then click **Save**
+
+> Student numbers must stay unique (a capital letter followed by 8 digits). Saving a student number that another user already has is rejected.
 
 ### Add a Quest Programmatically
 
