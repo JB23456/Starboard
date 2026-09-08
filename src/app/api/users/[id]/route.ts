@@ -50,7 +50,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         const pinHash = await bcrypt.hash(newPin, 10);
         result = await prisma.user.update({
           where: { id },
-          data: { pinHash },
+          data: { pinHash, mustChangePin: true },
         });
         break;
       }

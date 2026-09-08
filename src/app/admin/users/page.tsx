@@ -101,9 +101,9 @@ export default function AdminUsersPage() {
       {newPin && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4 flex items-center justify-between">
           <p className="text-sm">
-            <span className="font-medium">New PIN generated:</span>{" "}
+            <span className="font-medium">Temporary PIN generated:</span>{" "}
             <span className="font-mono text-lg font-bold">{newPin}</span>
-            <span className="text-gray-500 ml-2">(tell this to the student)</span>
+            <span className="text-gray-500 ml-2">(share it with the student — they'll set their own PIN the next time they log in)</span>
           </p>
           <button onClick={() => setNewPin(null)} className="text-sm text-gray-500 hover:text-gray-700">Dismiss</button>
         </div>

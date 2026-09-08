@@ -16,6 +16,7 @@ model User {
   role          String       @default("user")
   stars         Int          @default(0)
   active        Boolean      @default(true)
+  mustChangePin Boolean      @default(false)
   createdAt     DateTime     @default(now())
   sessions      Session[]
   submissions   Submission[]
