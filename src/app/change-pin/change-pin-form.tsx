@@ -2,37 +2,39 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
-export default function LoginPage() {
+export default function ChangePinForm({ role, mustChangePin }: { role: string; mustChangePin: boolean }) {
   const router = useRouter();
-  const [studentNumber, setStudentNumber] = useState("");
   const [pin, setPin] = useState("");
+  const [pinConfirm, setPinConfirm] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (pin !== pinConfirm) {
+      setError("PINs do not match");
+      return;
+    }
+    if (!/^\d{6}$/.test(pin)) {
+      setError("PIN must be exactly 6 digits");
+      return;
+    }
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("/api/auth/change-pin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentNumber, pin }),
+        body: JSON.stringify({ pin, pinConfirm }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Login failed");
+        setError(data.error || "Something went wrong");
         return;
       }
-      const dest = data.user.mustChangePin
-        ? "/change-pin"
-        : data.user.role === "admin"
-        ? "/admin"
-        : "/";
-      router.push(dest);
+      router.push(data.user?.role === "admin" ? "/admin" : "/");
       router.refresh();
     } catch {
       setError("Something went wrong");
@@ -43,21 +45,15 @@ export default function LoginPage() {
 
   return (
     <div className="max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-6 text-center">Log In</h1>
+      <h1 className="text-2xl font-bold mb-2 text-center">Set a New PIN</h1>
+      <p className="text-sm text-gray-600 mb-6 text-center">
+        {mustChangePin
+          ? "Your PIN was reset by an admin. Choose a new 6-digit PIN that only you know."
+          : "Choose a new 6-digit PIN."}
+      </p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Student Number</label>
-          <input
-            type="text"
-            value={studentNumber}
-            onChange={(e) => setStudentNumber(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-star"
-            required
-            autoComplete="username"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">PIN</label>
+          <label className="block text-sm font-medium mb-1">New PIN (6 digits)</label>
           <input
             type="password"
             value={pin}
@@ -65,7 +61,19 @@ export default function LoginPage() {
             maxLength={6}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-star"
             required
-            autoComplete="current-password"
+            autoComplete="new-password"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Confirm New PIN</label>
+          <input
+            type="password"
+            value={pinConfirm}
+            onChange={(e) => setPinConfirm(e.target.value)}
+            maxLength={6}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-star"
+            required
+            autoComplete="new-password"
           />
         </div>
         {error && (
@@ -76,12 +84,9 @@ export default function LoginPage() {
           disabled={loading}
           className="w-full bg-star-dark hover:bg-star text-white font-semibold py-2 rounded-lg transition disabled:opacity-50"
         >
-          {loading ? "Logging in..." : "Log In"}
+          {loading ? "Saving..." : "Save New PIN"}
         </button>
       </form>
-      <p className="mt-4 text-sm text-center text-gray-600">
-        No account? <Link href="/signup" className="text-star-dark font-medium">Sign up</Link>
-      </p>
     </div>
   );
 }

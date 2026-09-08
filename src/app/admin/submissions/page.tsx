@@ -13,7 +13,7 @@ interface Submission {
   adminNote: string | null;
   submittedAt: string;
   quest: { id: string; title: string; description: string; rewardStars: number; submissionType: string };
-  user: { id: string; firstName: string; lastName: string; studentNumber: string };
+  user: { id: string; firstName: string; discord: string; studentNumber: string };
 }
 
 export default function AdminSubmissionsPage() {
@@ -115,7 +115,7 @@ export default function AdminSubmissionsPage() {
                   </span>
                 </div>
                 <p className="text-gray-500 mt-1">
-                  {s.user.firstName} {s.user.lastName} &middot; {new Date(s.submittedAt).toLocaleDateString()}
+                  {s.user.firstName} ({s.user.discord}) &middot; {new Date(s.submittedAt).toLocaleDateString()}
                 </p>
               </button>
             ))
@@ -133,7 +133,7 @@ export default function AdminSubmissionsPage() {
 
               <div className="bg-gray-50 rounded-lg p-3">
                 <p className="text-sm font-medium mb-1">
-                  Submitted by: {selected.user.firstName} {selected.user.lastName} ({selected.user.studentNumber})
+                  Submitted by: {selected.user.firstName} ({selected.user.discord})
                 </p>
                 {selected.textPayload && (
                   <p className="text-sm whitespace-pre-wrap">{selected.textPayload}</p>

@@ -10,12 +10,13 @@ datasource db {
 model User {
   id            String       @id @default(cuid())
   firstName     String
-  lastName      String
+  discord       String       @default("")
   studentNumber String       @unique
   pinHash       String
   role          String       @default("user")
   stars         Int          @default(0)
   active        Boolean      @default(true)
+  mustChangePin Boolean      @default(false)
   createdAt     DateTime     @default(now())
   sessions      Session[]
   submissions   Submission[]

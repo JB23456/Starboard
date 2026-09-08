@@ -6,7 +6,7 @@ import { createSession, sessionCookieOptions } from "@/lib/auth";
 
 const signupSchema = z.object({
   firstName: z.string().min(1).max(100),
-  lastName: z.string().min(1).max(100),
+  discord: z.string().min(1).max(100),
   studentNumber: z.string().regex(/^[A-Z]\d{8}$/, "Student number must be a capital letter followed by 8 digits"),
   pin: z.string().regex(/^\d{6}$/, "PIN must be exactly 6 digits"),
   pinConfirm: z.string(),
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 });
     }
 
-    const { firstName, lastName, studentNumber, pin: pinVal } = parsed.data;
+    const { firstName, discord, studentNumber, pin: pinVal } = parsed.data;
 
     if (pin !== pinConfirm) {
       return NextResponse.json({ error: "PINs do not match" }, { status: 400 });
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.create({
       data: {
         firstName,
-        lastName,
+        discord,
         studentNumber,
         pinHash,
         role: isFirstUser ? "admin" : "user",

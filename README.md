@@ -1,6 +1,6 @@
 # Starboard
 
-A questboard web app. Users sign up with a student number (one capital letter followed by 8 digits, e.g. `C12345678`) and a 6-digit PIN, complete quests (text or image submissions), earn stars, and climb a public leaderboard.
+A questboard web app. Users sign up with their first name, Discord username, a student number (one capital letter followed by 8 digits, e.g. `C12345678`) and a 6-digit PIN, complete quests (text or image submissions), earn stars, and climb a public leaderboard showing first name, Discord, and star count.
 
 ---
 
@@ -23,7 +23,7 @@ A questboard web app. Users sign up with a student number (one capital letter fo
 ## Database Schema (SQLite)
 
 ```
-User         — firstName, lastName, studentNumber (unique), pinHash, role, stars, active
+User         — firstName, discord, studentNumber (unique), pinHash, role, stars, active, mustChangePin
 Quest        — title, description, rewardStars, submissionType (text|image), active, removedAt
 Submission   — questId, userId, textPayload, imagePath, status (pending|approved|rejected)
 Session      — token (unique), userId, expiresAt
@@ -99,7 +99,7 @@ All frontend styling is in `src/app/globals.css` and `tailwind.config.ts`. Key p
 
 ### Admin Access
 
-Only users with `role: "admin"` can access `/admin/*` routes and admin API endpoints. The first account to sign up becomes the admin automatically. You can promote/demote users from the admin panel (`/admin/users`).
+Only users with `role: "admin"` can access `/admin/*` routes and admin API endpoints. The first account to sign up becomes the admin automatically. From the admin panel (`/admin/users`) you can promote/demote users, reset their PIN, adjust stars, disable accounts, and correct a user's first name, Discord username, or student number.
 
 ---
 
@@ -213,8 +213,16 @@ tar -xzf starboard-backup-YYYY-MM-DD.tar.gz
 
 ### Reset a User's PIN
 1. Navigate to `/admin/users`
-2. Find the user, click "Reset PIN"
-3. A new 6-digit PIN is generated and displayed — share it with the student
+2. Find the user, click **Reset PIN**
+3. A **temporary** 6-digit PIN is generated and displayed — share it with the student
+4. The next time the student logs in with that PIN, they're taken to a page to choose a new PIN of their own (entered twice). The temporary PIN stops working once they do, so the admin never learns the final PIN.
+
+### Edit a User's Details
+1. Navigate to `/admin/users`
+2. Find the user, click **Edit**
+3. Update the first name, Discord username, and/or student number, then click **Save**
+
+> Student numbers must stay unique (a capital letter followed by 8 digits). Saving a student number that another user already has is rejected.
 
 ### Add a Quest Programmatically
 
@@ -272,7 +280,7 @@ starboard/
 
 ## Security Notes
 
-- No hardcoded credentials: the first account to sign up becomes the admin; admin PIN resets use a cryptographically secure random number
+- No hardcoded credentials: the first account to sign up becomes the admin; PIN resets issue a **temporary** PIN (cryptographically secure random) that the user must replace with their own at next login, so the admin never learns the final PIN
 - PINs are hashed with bcrypt (10 rounds); student number format (`A`–`Z` + 8 digits) is enforced server-side at signup
 - Session cookies are HttpOnly, SameSite=Strict, Secure in production; 7-day expiry, purged on access when expired
 - Login rate-limited: 5 attempts / 15 min per student number (in-memory, per-process — resets on restart)

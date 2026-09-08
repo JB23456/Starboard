@@ -7,7 +7,7 @@ import Link from "next/link";
 export default function SignupPage() {
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [discord, setDiscord] = useState("");
   const [studentNumber, setStudentNumber] = useState("");
   const [pin, setPin] = useState("");
   const [pinConfirm, setPinConfirm] = useState("");
@@ -32,7 +32,7 @@ export default function SignupPage() {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName, lastName, studentNumber, pin, pinConfirm }),
+        body: JSON.stringify({ firstName, discord, studentNumber, pin, pinConfirm }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -64,13 +64,14 @@ export default function SignupPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Last Name</label>
+            <label className="block text-sm font-medium mb-1">Discord Username</label>
             <input
               type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              value={discord}
+              onChange={(e) => setDiscord(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-star"
               required
+              placeholder="e.g. star_seeker"
             />
           </div>
         </div>

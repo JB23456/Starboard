@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 interface User {
   id: string;
   firstName: string;
-  lastName: string;
+  discord: string;
   studentNumber: string;
   role: string;
   stars: number;
@@ -22,6 +22,8 @@ export default function AdminUsersPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [newPin, setNewPin] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [editing, setEditing] = useState<User | null>(null);
+  const [editForm, setEditForm] = useState({ firstName: "", discord: "", studentNumber: "" });
 
   const fetchUsers = useCallback(async (q?: string) => {
     const url = q ? `/api/users?search=${encodeURIComponent(q)}` : "/api/users";
@@ -58,6 +60,31 @@ export default function AdminUsersPage() {
     router.refresh();
   }
 
+  function startEdit(u: User) {
+    setError("");
+    setEditing(u);
+    setEditForm({ firstName: u.firstName, discord: u.discord, studentNumber: u.studentNumber });
+  }
+
+  async function handleSaveProfile(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editing) return;
+    setError("");
+    const res = await fetch(`/api/users/${editing.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "updateProfile", profile: editForm }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error || "Update failed");
+      return;
+    }
+    setEditing(null);
+    fetchUsers(search);
+    router.refresh();
+  }
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
@@ -66,7 +93,7 @@ export default function AdminUsersPage() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name or student #..."
+            placeholder="Search by name, Discord, or student #..."
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-64"
         />
       </div>
@@ -74,14 +101,69 @@ export default function AdminUsersPage() {
       {newPin && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4 flex items-center justify-between">
           <p className="text-sm">
-            <span className="font-medium">New PIN generated:</span>{" "}
+            <span className="font-medium">Temporary PIN generated:</span>{" "}
             <span className="font-mono text-lg font-bold">{newPin}</span>
-            <span className="text-gray-500 ml-2">(tell this to the student)</span>
+            <span className="text-gray-500 ml-2">(share it with the student — they'll set their own PIN the next time they log in)</span>
           </p>
           <button onClick={() => setNewPin(null)} className="text-sm text-gray-500 hover:text-gray-700">Dismiss</button>
         </div>
       )}
 
+      {editing && (
+        <div className="bg-star-light border border-star rounded-lg p-4 mb-4">
+          <h2 className="font-semibold mb-3">
+            Edit {editing.firstName}{" "}
+            <span className="text-gray-500 font-normal">({editing.studentNumber})</span>
+          </h2>
+          <form onSubmit={handleSaveProfile} className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+            <div>
+              <label className="block text-sm font-medium mb-1">First Name</label>
+              <input
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-star"
+                value={editForm.firstName}
+                onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                maxLength={100}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Discord</label>
+              <input
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-star"
+                value={editForm.discord}
+                onChange={(e) => setEditForm({ ...editForm, discord: e.target.value })}
+                maxLength={100}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Student Number</label>
+              <input
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-star"
+                value={editForm.studentNumber}
+                onChange={(e) => setEditForm({ ...editForm, studentNumber: e.target.value })}
+                required
+                placeholder="e.g. C12345678"
+              />
+            </div>
+            <div className="flex gap-2 sm:col-span-3">
+              <button
+                type="submit"
+                className="bg-star-dark hover:bg-star text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditing(null)}
+                className="text-sm text-gray-600 hover:text-gray-800 px-2"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
       {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
 
       <div className="overflow-x-auto">
@@ -89,6 +171,7 @@ export default function AdminUsersPage() {
           <thead>
             <tr className="border-b border-gray-200 text-left">
               <th className="py-2 pr-4">Name</th>
+              <th className="py-2 pr-4">Discord</th>
               <th className="py-2 pr-4">Student #</th>
               <th className="py-2 pr-4">Role</th>
               <th className="py-2 pr-4">Stars</th>
@@ -106,7 +189,8 @@ export default function AdminUsersPage() {
                 }`}
                 onClick={() => setSelectedId(u.id)}
               >
-                <td className="py-2 pr-4 font-medium">{u.firstName} {u.lastName}</td>
+                <td className="py-2 pr-4 font-medium">{u.firstName}</td>
+                <td className="py-2 pr-4 text-gray-500">{u.discord}</td>
                 <td className="py-2 pr-4">{u.studentNumber}</td>
                 <td className="py-2 pr-4">
                   <span className={`px-2 py-0.5 rounded-full text-xs ${
@@ -126,6 +210,12 @@ export default function AdminUsersPage() {
                 </td>
                 <td className="py-2">
                   <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => startEdit(u)}
+                      className="text-xs text-gray-700 hover:underline"
+                    >
+                      Edit
+                    </button>
                     <button
                       onClick={() => handleAction(u.id, "resetPin")}
                       className="text-xs text-blue-600 hover:underline"

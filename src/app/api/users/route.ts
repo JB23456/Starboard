@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
         ? {
             OR: [
               { firstName: { contains: search } },
-              { lastName: { contains: search } },
+              { discord: { contains: search } },
               { studentNumber: { contains: search } },
             ],
           }

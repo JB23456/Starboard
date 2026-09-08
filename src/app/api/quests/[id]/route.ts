@@ -13,7 +13,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const { id } = await params;
     const quest = await prisma.quest.findUnique({
       where: { id, removedAt: null },
-      include: { submissions: { include: { user: { select: { id: true, firstName: true, lastName: true, studentNumber: true } } }, orderBy: { submittedAt: "desc" } } },
+       include: { submissions: { include: { user: { select: { id: true, firstName: true, discord: true, studentNumber: true } } }, orderBy: { submittedAt: "desc" } } },
     });
     if (!quest) {
       return NextResponse.json({ error: "Quest not found" }, { status: 404 });

@@ -8,7 +8,7 @@ export default async function LeaderboardPage() {
 
   const topUsers = await prisma.user.findMany({
     where: { active: true, stars: { gt: 0 } },
-    select: { firstName: true, lastName: true, studentNumber: true, stars: true },
+    select: { id: true, firstName: true, discord: true, stars: true },
     orderBy: { stars: "desc" },
     take: 50,
   });
@@ -37,14 +37,14 @@ export default async function LeaderboardPage() {
             <thead>
               <tr className="border-b border-gray-200 text-left">
                 <th className="py-2 pr-4 w-12">Rank</th>
-                <th className="py-2 pr-4">Name</th>
-                <th className="py-2 pr-4">Student #</th>
+                <th className="py-2 pr-4">First Name</th>
+                <th className="py-2 pr-4">Discord</th>
                 <th className="py-2 text-right">Stars</th>
               </tr>
             </thead>
             <tbody>
               {topUsers.map((u, i) => (
-                <tr key={u.studentNumber} className="border-b border-gray-100">
+                <tr key={u.id} className="border-b border-gray-100">
                   <td className="py-2 pr-4">
                     {i < 3 ? (
                       <span className="font-bold text-star-dark">#{i + 1}</span>
@@ -52,8 +52,8 @@ export default async function LeaderboardPage() {
                       <span className="text-gray-500">#{i + 1}</span>
                     )}
                   </td>
-                  <td className="py-2 pr-4 font-medium">{u.firstName} {u.lastName}</td>
-                  <td className="py-2 pr-4 text-gray-500">{u.studentNumber}</td>
+                    <td className="py-2 pr-4 font-medium">{u.firstName}</td>
+                    <td className="py-2 pr-4 text-gray-500">{u.discord}</td>
                   <td className="py-2 text-right font-bold text-star-dark">{u.stars}</td>
                 </tr>
               ))}

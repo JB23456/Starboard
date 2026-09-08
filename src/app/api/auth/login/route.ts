@@ -53,7 +53,12 @@ export async function POST(req: NextRequest) {
 
     const res = NextResponse.json({
       ok: true,
-      user: { id: user.id, firstName: user.firstName, role: user.role },
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        role: user.role,
+        mustChangePin: user.mustChangePin,
+      },
     });
     res.cookies.set("session", token, sessionCookieOptions(req));
     return res;
