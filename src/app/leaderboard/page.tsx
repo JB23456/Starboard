@@ -21,13 +21,21 @@ export default async function LeaderboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Leaderboard</h1>
-
-      {myRank && (
-        <p className="mb-4 text-sm text-gray-600">
-          You are ranked <span className="font-bold text-star-dark">#{myRank}</span>
-        </p>
-      )}
+      <div className="flex items-start gap-4 mb-6">
+        <img
+          src="/assets/mascot.png"
+          alt="Starboard mascot"
+          className="h-16 w-auto"
+        />
+        <div>
+          <h1 className="text-2xl font-bold">Leaderboard</h1>
+          {myRank && (
+            <p className="mb-4 text-sm text-gray-600">
+              You are ranked <span className="font-bold text-star-dark">#{myRank}</span>
+            </p>
+          )}
+        </div>
+      </div>
 
       {topUsers.length === 0 ? (
         <p className="text-gray-500">No one has earned stars yet. Be the first!</p>
