@@ -14,9 +14,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en">
       <body className="font-sans antialiased">
         <header className="bg-white border-b border-gray-200">
-          <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between relative">
             <Link href="/" className="text-xl font-bold text-star-dark">
               Starboard
+            </Link>
+            <Link href="/" className="absolute left-1/2 -translate-x-1/2">
+              <img
+                src="/assets/logo.png"
+                alt="Society logo"
+                className="h-8 w-auto"
+              />
             </Link>
             <nav className="flex gap-4 text-sm">
               {user?.role === "admin" && (

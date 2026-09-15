@@ -48,7 +48,13 @@ async function LoggedInHome({ user }: { user: User }) {
   return (
     <div>
       <div className="mb-8 flex items-start justify-between gap-4">
-        <div>
+        <div className="flex items-start gap-4">
+          <img
+            src="/assets/mascot.png"
+            alt="Starboard mascot"
+            className="h-16 w-auto"
+          />
+          <div>
           <h1 className="text-2xl font-bold">Welcome back, {user.firstName}</h1>
           <p className="text-gray-600">
             You have <span className="font-bold text-star-dark">{user.stars} stars</span>
@@ -56,6 +62,7 @@ async function LoggedInHome({ user }: { user: User }) {
               <> · {pendingCount} submission{pendingCount === 1 ? "" : "s"} awaiting review</>
             )}
           </p>
+          </div>
         </div>
         <LogoutButton />
       </div>
@@ -110,6 +117,11 @@ async function LoggedInHome({ user }: { user: User }) {
 function LandingPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+      <img
+        src="/assets/mascot.png"
+        alt="Starboard mascot"
+        className="h-32 w-auto mb-6"
+      />
       <h1 className="text-4xl md:text-5xl font-bold mb-4">
         Earn stars, climb the board.
       </h1>
