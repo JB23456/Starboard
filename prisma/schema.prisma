@@ -29,7 +29,9 @@ model Quest {
   description    String
   rewardStars    Int
   submissionType String
-  active         Boolean      @default(true)
+  active         Boolean      @default(false)
+  announcedAt    DateTime?
+  closeAnnouncedAt DateTime?
   createdBy      String
   createdAt      DateTime     @default(now())
   removedAt      DateTime?

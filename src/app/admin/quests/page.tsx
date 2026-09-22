@@ -24,6 +24,7 @@ export default function AdminQuestsPage() {
   const [description, setDescription] = useState("");
   const [rewardStars, setRewardStars] = useState(10);
   const [submissionType, setSubmissionType] = useState("text");
+  const [publishNow, setPublishNow] = useState(false);
 
   const fetchQuests = useCallback(async () => {
     const res = await fetch("/api/quests?all=1");
@@ -39,7 +40,9 @@ export default function AdminQuestsPage() {
     e.preventDefault();
     setError("");
 
-    const body = { title, description, rewardStars, submissionType };
+    const body = editingId
+      ? { title, description, rewardStars, submissionType }
+      : { title, description, rewardStars, submissionType, active: publishNow };
     const url = editingId ? `/api/quests/${editingId}` : "/api/quests";
     const method = editingId ? "PATCH" : "POST";
 
@@ -81,6 +84,7 @@ export default function AdminQuestsPage() {
     setDescription("");
     setRewardStars(10);
     setSubmissionType("text");
+    setPublishNow(false);
     setEditingId(null);
   }
 
@@ -144,6 +148,17 @@ export default function AdminQuestsPage() {
               <option value="image">Image</option>
             </select>
           </div>
+          {!editingId && (
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={publishNow}
+                onChange={(e) => setPublishNow(e.target.checked)}
+                className="rounded"
+              />
+              Publish now (visible to students and announced on Discord)
+            </label>
+          )}
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex gap-2">
             <button type="submit" className="bg-star-dark text-white px-4 py-2 rounded-lg text-sm font-medium">

@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
+import { announceQuestLive } from "@/lib/discord";
 
 const createQuestSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().min(1).max(5000),
   rewardStars: z.number().int().min(1).max(10000),
   submissionType: z.enum(["text", "image"]),
+  active: z.boolean().optional(),
 });
 
 export async function GET(req: NextRequest) {
@@ -44,11 +46,20 @@ export async function POST(req: NextRequest) {
         description: parsed.data.description,
         rewardStars: parsed.data.rewardStars,
         submissionType: parsed.data.submissionType,
+        active: parsed.data.active ?? false,
         createdBy: admin.id,
       },
     });
 
-    return NextResponse.json(quest, { status: 201 });
+    let created = quest;
+    if (quest.active) {
+      const ok = await announceQuestLive(quest);
+      if (ok) {
+        created = await prisma.quest.update({ where: { id: quest.id }, data: { announcedAt: new Date() } });
+      }
+    }
+
+    return NextResponse.json(created, { status: 201 });
   } catch (error) {
     console.error("Create quest error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
