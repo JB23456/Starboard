@@ -11,6 +11,8 @@ services:
       - starboard-data:/app/data
     environment:
       - DATABASE_URL=file:/app/data/production.db
+      - DISCORD_QUEST_WEBHOOK_URL=https://discord.com/api/webhooks/...
+      - PUBLIC_APP_URL=https://your-domain
     command: ["sh", "-c", "npx prisma migrate deploy && npm start"]
     restart: unless-stopped
 
