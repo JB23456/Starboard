@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
+import { announceQuestClosed, announceQuestLive } from "@/lib/discord";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -47,12 +48,33 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 });
     }
 
+    const existing = await prisma.quest.findUnique({ where: { id } });
+    if (!existing) {
+      return NextResponse.json({ error: "Quest not found" }, { status: 404 });
+    }
+
     const quest = await prisma.quest.update({
       where: { id },
       data: parsed.data,
     });
 
-    return NextResponse.json(quest);
+    let announced = false;
+    if (parsed.data.active !== undefined && parsed.data.active !== existing.active) {
+      if (quest.active && !existing.announcedAt) {
+        announced = await announceQuestLive(quest);
+      } else if (!quest.active && !existing.closeAnnouncedAt) {
+        announced = await announceQuestClosed(quest);
+      }
+      if (announced) {
+        const stamp = quest.active ? { announcedAt: new Date() } : { closeAnnouncedAt: new Date() };
+        await prisma.quest.update({ where: { id }, data: stamp });
+      }
+    }
+
+    const final = announced
+      ? await prisma.quest.findUnique({ where: { id } })
+      : quest;
+    return NextResponse.json(final);
   } catch (error) {
     console.error("Update quest error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

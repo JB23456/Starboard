@@ -24,7 +24,7 @@ A questboard web app. Users sign up with their first name, Discord username, a s
 
 ```
 User         — firstName, discord, studentNumber (unique), pinHash, role, stars, active, mustChangePin
-Quest        — title, description, rewardStars, submissionType (text|image), active, removedAt
+Quest        — title, description, rewardStars, submissionType (text|image), active (default false), announcedAt, closeAnnouncedAt, removedAt
 Submission   — questId, userId, textPayload, imagePath, status (pending|approved|rejected)
 Session      — token (unique), userId, expiresAt
 ```
@@ -72,12 +72,24 @@ To add or remove admin accounts afterwards, use **Set Role** in the admin panel 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `DATABASE_URL` | `file:./dev.db` | Path to the SQLite database file. Change to `file:./production.db` in production. |
+| `DISCORD_QUEST_WEBHOOK_URL` | *(unset)* | Incoming webhook URL for Discord quest notifications. If unset, notifications are silently disabled. |
+| `PUBLIC_APP_URL` | *(unset)* | Public base URL of the app (no trailing slash), used for quest links in Discord messages. |
 
 For production, create a `.env.production` file **on the deployment machine** (it is gitignored and not committed to the repository):
 
 ```
 DATABASE_URL="file:./production.db"
+DISCORD_QUEST_WEBHOOK_URL="https://discord.com/api/webhooks/..."
+PUBLIC_APP_URL="https://starboard.example.com"
 ```
+
+#### Discord notifications setup
+
+1. In Discord: server → channel → **Settings → Integrations → Webhooks → New Webhook → Copy URL**
+2. Put the URL in `DISCORD_QUEST_WEBHOOK_URL` and your app's public URL in `PUBLIC_APP_URL`
+3. Restart the app. Quest activate/deactivate events now post a rich embed (with a link to the quest) to that channel.
+
+No Discord bot is required — a plain incoming webhook is used.
 
 ### Frontend Configuration
 
@@ -96,6 +108,7 @@ All frontend styling is in `src/app/globals.css` and `tailwind.config.ts`. Key p
 - **Rate limiting:** `src/app/api/auth/login/route.ts` — the `loginAttempts` Map enforces 5 attempts per 15 minutes per student number. Adjust `MAX_ATTEMPTS` and `ATTEMPT_WINDOW_MS` to change. Note this is an **in-memory, per-process** limiter: it resets on restart and is not shared across multiple app instances.
 - **Upload limits:** `src/lib/upload.ts` — `MAX_SIZE` (5 MB) and `ALLOWED_MIME` (jpeg/png/webp) control what's accepted.
 - **Image storage:** Files are saved to `data/uploads/` relative to the project root. This directory should be persistent (back it up or use a volume in containerized deployments).
+- **Discord notifications:** `src/lib/discord.ts` posts a rich embed to `DISCORD_QUEST_WEBHOOK_URL` when a quest goes live (activate transition, or "Publish now" at creation) and when it is closed (deactivate transition). A quest is announced **at most once per state** — `Quest.announcedAt` and `Quest.closeAnnouncedAt` are stamped only after a successful webhook send, so toggling repeatedly (admin error) never re-announces, and a failed send can be retried by toggling again.
 
 ### Admin Access
 
@@ -203,7 +216,9 @@ tar -xzf starboard-backup-YYYY-MM-DD.tar.gz
 1. Log in as admin → navigate to `/admin/quests`
 2. Click "+ New Quest"
 3. Fill in title, description, reward stars, submission type
-4. Click Create
+4. Optionally tick **Publish now** — unchecked by default, quests are created deactivated (hidden from students)
+5. Click Create
+6. To publish later, click **Activate** on the quest. Activating (and deactivating) posts a one-off notification to the configured Discord channel.
 
 ### Review a Submission
 1. Navigate to `/admin/submissions`
